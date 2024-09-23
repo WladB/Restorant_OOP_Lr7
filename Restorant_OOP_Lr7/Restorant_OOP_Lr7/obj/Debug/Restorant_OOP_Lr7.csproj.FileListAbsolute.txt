@@ -1,0 +1,7 @@
+C:\Users\User\Desktop\ConsoleAppRestaurantTableReservationManager\Restorant_OOP_Lr7\Restorant_OOP_Lr7\Restorant_OOP_Lr7\bin\Debug\Restorant_OOP_Lr7.exe.config
+C:\Users\User\Desktop\ConsoleAppRestaurantTableReservationManager\Restorant_OOP_Lr7\Restorant_OOP_Lr7\Restorant_OOP_Lr7\bin\Debug\Restorant_OOP_Lr7.exe
+C:\Users\User\Desktop\ConsoleAppRestaurantTableReservationManager\Restorant_OOP_Lr7\Restorant_OOP_Lr7\Restorant_OOP_Lr7\bin\Debug\Restorant_OOP_Lr7.pdb
+C:\Users\User\Desktop\ConsoleAppRestaurantTableReservationManager\Restorant_OOP_Lr7\Restorant_OOP_Lr7\Restorant_OOP_Lr7\obj\Debug\Restorant_OOP_Lr7.csproj.AssemblyReference.cache
+C:\Users\User\Desktop\ConsoleAppRestaurantTableReservationManager\Restorant_OOP_Lr7\Restorant_OOP_Lr7\Restorant_OOP_Lr7\obj\Debug\Restorant_OOP_Lr7.csproj.CoreCompileInputs.cache
+C:\Users\User\Desktop\ConsoleAppRestaurantTableReservationManager\Restorant_OOP_Lr7\Restorant_OOP_Lr7\Restorant_OOP_Lr7\obj\Debug\Restorant_OOP_Lr7.exe
+C:\Users\User\Desktop\ConsoleAppRestaurantTableReservationManager\Restorant_OOP_Lr7\Restorant_OOP_Lr7\Restorant_OOP_Lr7\obj\Debug\Restorant_OOP_Lr7.pdb

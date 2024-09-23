@@ -2,206 +2,236 @@
 using System.Collections.Generic;
 using System.IO;
 
-
-public class TableReservationApp
+namespace Restorant_OOP_Lr7
 {
-    static void Main(string[] args)
+    public class TableReservationApp
     {
-        ReservationManager m = new ReservationManager();
-        m.AddRestaurant("A", 10);
-        m.AddRestaurant("B", 5);
-
-        Console.WriteLine(m.BookTable("A", new DateTime(2023, 12, 25), 3)); // True
-        Console.WriteLine(m.BookTable("A", new DateTime(2023, 12, 25), 3)); // False
-    }
-}
-
-
-public class ReservationManager
-{
-
-    public List<Restaurant> restaurants;
-
-    public ReservationManager()
-    {
-        restaurants = new List<Restaurant>();
-    }
-
-
-    public void AddRestaurant(string n, int t)
-    {
-        try
+        static void Main(string[] args)
         {
-            Restaurant restaurant = new Restaurant();
-            restaurant.name = n;
-            restaurant.tables = new RestaurantTable[t];
-            for (int i = 0; i < t; i++)
+            ReservationManager reservationManager = new ReservationManager();
+            reservationManager.AddRestaurant("A", 10);
+            reservationManager.AddRestaurant("B", 5);
+
+            //Замінити значення
+            Console.WriteLine(reservationManager.BookTable("A", new DateTime(2023, 12, 25), 3)); // True
+            Console.WriteLine(reservationManager.BookTable("A", new DateTime(2023, 12, 25), 3)); // False
+            Console.ReadLine();
+        }
+    }
+
+
+    public class ReservationManager
+    {
+
+        public List<Restaurant> restaurants;
+
+        public ReservationManager()
+        {
+            restaurants = new List<Restaurant>();
+        }
+
+
+        public void AddRestaurant(string restaurantName, int tablesCount)
+        {
+            try
             {
-                restaurant.tables[i] = new RestaurantTable();
+                if (string.IsNullOrWhiteSpace(restaurantName) || tablesCount<0) {
+                    throw new AddRestaurantException( restaurantName, tablesCount);
+                }
+                Restaurant restaurant = new Restaurant();
+                restaurant.name = restaurantName;
+                restaurant.tables = new RestaurantTable[tablesCount];
+                for (int i = 0; i < tablesCount; i++)
+                {
+                    restaurant.tables[i] = new RestaurantTable();
+                }
+                restaurants.Add(restaurant);
             }
-            restaurants.Add(restaurant);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error");
-        }
-    }
-
-
-    private void LoadFromFile(string fileP)
-    {
-        try
-        {
-            string[] ls = File.ReadAllLines(fileP);
-            foreach (string l in ls)
+            catch (AddRestaurantException ex)
             {
-                var parts = l.Split(',');
-                if (parts.Length == 2 && int.TryParse(parts[1], out int tableCount))
-                {
-                    AddRestaurant(parts[0], tableCount);
-                }
-                else
-                {
-                    Console.WriteLine(l);
-                }
+                Console.WriteLine(ex.ToString());
             }
         }
-        catch (Exception ex)
+
+
+        public void LoadFromFile(string filePath)
         {
-            Console.WriteLine("Error");
-        }
-    }
-
-
-    public List<string> FindAllFreeTables(DateTime date)
-    {
-        try
-        { 
-            List<string> free = new List<string>();
-            foreach (var restaurant in restaurants)
+            try
             {
-                for (int i = 0; i < restaurant.tables.Length; i++)
+                if (!File.Exists(filePath)) {
+                    throw new OpenFileExeption(filePath);
+                }
+                string[] lines = File.ReadAllLines(filePath);
+                foreach (string l in lines)
                 {
-                    if (!restaurant.tables[i].IsBooked(date))
+                    var parts = l.Split(',');
+                    if (parts.Length == 2 && int.TryParse(parts[1], out int tableCount))
                     {
-                        free.Add($"{restaurant.name} - Table {i + 1}");
+                        AddRestaurant(parts[0], tableCount);
+                    }
+                    else
+                    {
+                        Console.WriteLine(l);
                     }
                 }
             }
-            return free;
+            catch (OpenFileExeption ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
         }
-        catch (Exception ex)
+
+
+        public List<string> FindAllFreeTables(DateTime date)
         {
-            Console.WriteLine("Error");
+            try
+            {
+                if (date == DateTime.MinValue)
+                {
+                    throw new DateException();
+                }
+
+
+                List<string> restaurantFree = new List<string>();
+                foreach (var restaurant in restaurants)
+                {
+                    for (int i = 0; i < restaurant.tables.Length; i++)
+                    {
+                        if (!restaurant.tables[i].IsBooked(date))
+                        {
+                            restaurantFree.Add($"{restaurant.name} - Table {i + 1}");
+                        }
+                    }
+                }
+                return restaurantFree;
+            }
+            catch (DateException ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
             return new List<string>();
         }
-    }
 
-    public bool BookTable(string restaurantName, DateTime date, int tableNumber)
-    {
-        foreach (var restaurant in restaurants)
+        public bool BookTable(string restaurantName, DateTime date, int tableNumber)
         {
-            if (restaurant.name == restaurantName)
+            try
             {
-                if (tableNumber < 0 || tableNumber >= restaurant.tables.Length)
+                foreach (var restaurant in restaurants)
                 {
-                    throw new Exception(null); //Invalid table number
-                }
-
-                return restaurant.tables[tableNumber].Book(date);
-            }
-        }
-
-        throw new Exception(null); //Restaurant not found
-    }
-
-    public void SortByAvailability(DateTime date)
-    {
-        try
-        { 
-            bool swapped;
-            do
-            {
-                swapped = false;
-                for (int i = 0; i < restaurants.Count - 1; i++)
-                {
-                    int avTc = CountAvailableTables(restaurants[i], date);
-                    int avTn = CountAvailableTables(restaurants[i + 1], date); 
-
-                    if (avTc < avTn)
+                    if (restaurant.name == restaurantName)
                     {
-                        var temp = restaurants[i];
-                        restaurants[i] = restaurants[i + 1];
-                        restaurants[i + 1] = temp;
-                        swapped = true;
+                        if (tableNumber < 0 || tableNumber >= restaurant.tables.Length)
+                        {
+                            throw new BookTableException(restaurant.tables.Length, tableNumber); //Invalid table number
+                        }
+
+                        return restaurant.tables[tableNumber].Book(date);
                     }
                 }
-            } while (swapped);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error");
-        }
-    }
-    public int CountAvailableTables(Restaurant restaurant, DateTime date)
-    {
-        try
-        {
-            int count = 0;
-            foreach (var tables in restaurant.tables)
-            {
-                if (!tables.IsBooked(date))
-                {
-                    count++;
-                }
             }
-            return count;
+            catch(BookTableException ex) {
+                Console.WriteLine(ex.ToString());
+            }
+            
+
+            return false; //Restaurant not found
         }
-        catch (Exception ex)
+
+        public void SortByAvailability(DateTime date)
         {
-            Console.WriteLine("Error");
-            return 0;
+            try
+            {
+                bool swapped;
+                do
+                {
+                    swapped = false;
+                    for (int i = 0; i < restaurants.Count - 1; i++)
+                    {
+                        int avTc = CountAvailableTables(restaurants[i], date); //Зробити сортування mergeSort
+                        int avTn = CountAvailableTables(restaurants[i + 1], date);
+
+                        if (avTc < avTn)
+                        {
+                            var temp = restaurants[i];
+                            restaurants[i] = restaurants[i + 1];
+                            restaurants[i + 1] = temp;
+                            swapped = true;
+                        }
+                    }
+                } while (swapped);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error");
+            }
+        }
+        public int CountAvailableTables(Restaurant restaurant, DateTime date)
+        {
+            try
+            {
+                if (restaurant == null|| date == DateTime.MinValue) {
+                    throw new TablesAvailabilityException(restaurant, date);
+                }
+                int count = 0;
+                foreach (var tables in restaurant.tables)
+                {
+                    if (!tables.IsBooked(date))
+                    {
+                        count++;
+                    }
+                }
+                return count;
+            }
+            catch (TablesAvailabilityException ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return 0;
+            }
         }
     }
-}
 
-
-public class Restaurant
-{
-    public string name;
-    public RestaurantTable[] tables;
-}
-
-public class RestaurantTable
-{
-    private List<DateTime> bookDates;
-
-
-    public RestaurantTable()
+    public class Restaurant
     {
-        bookDates = new List<DateTime>();
+        public string name;
+        public RestaurantTable[] tables;
     }
 
-    public bool Book(DateTime date)
+    public class RestaurantTable
     {
-        try
-        { 
-            if (bookDates.Contains(date))
+        private List<DateTime> bookDates;
+
+
+        public RestaurantTable()
+        {
+            bookDates = new List<DateTime>();
+        }
+
+        public bool Book(DateTime date)
+        {
+            try
             {
+                if (date == DateTime.MinValue)
+                {
+                    throw new DateException();
+                }
+
+                if (bookDates.Contains(date))
+                {
+                    return false;
+                }
+                bookDates.Add(date);
+                return true;
+            }
+            catch (DateException ex)
+            {
+                Console.WriteLine(ex.ToString());
                 return false;
             }
-            bookDates.Add(date);
-            return true;
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error");
-            return false;
-        }
-    }
 
-    public bool IsBooked(DateTime date)
-    {
-        return bookDates.Contains(date);
+        public bool IsBooked(DateTime date)
+        {
+            return bookDates.Contains(date);
+        }
     }
-}
+} 
