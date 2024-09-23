@@ -25,7 +25,7 @@ namespace Restorant_OOP_Lr7
         }
         public override string ToString()
         {
-          
+
             return FormatErrorMessage($"Шлях '{filePath}' до файлу є некоректним, невдалося зчитати файл");
         }
     }
@@ -101,7 +101,7 @@ namespace Restorant_OOP_Lr7
         }
         public override string ToString()
         {
-            string errorMesage = "При підрахунку кількості столиків виникли такi помилки:";
+            string errorMesage = "При пiдрахунку кiлькостi столикiв виникли такi помилки:";
             if (selectedRestaurant == null)
             {
                 errorMesage += "\n- Змiнну типу Restaurant не iнiцiалiзовано";
@@ -111,6 +111,13 @@ namespace Restorant_OOP_Lr7
                 errorMesage += "\n- Змiнна типу DateTime вказана некоректно";
             }
             return FormatErrorMessage(errorMesage);
+        }
+    }
+    public class SortException : CustomException
+    {
+        public override string ToString()
+        {
+            return FormatErrorMessage("- Неможливо запустити сортування, List порожнiй або не iнiцiалiзований");
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Restorant_OOP_Lr7
 {
@@ -12,9 +13,11 @@ namespace Restorant_OOP_Lr7
             reservationManager.AddRestaurant("A", 10);
             reservationManager.AddRestaurant("B", 5);
 
+
             //Замінити значення
             Console.WriteLine(reservationManager.BookTable("A", new DateTime(2023, 12, 25), 3)); // True
             Console.WriteLine(reservationManager.BookTable("A", new DateTime(2023, 12, 25), 3)); // False
+
             Console.ReadLine();
         }
     }
@@ -35,8 +38,9 @@ namespace Restorant_OOP_Lr7
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(restaurantName) || tablesCount<0) {
-                    throw new AddRestaurantException( restaurantName, tablesCount);
+                if (string.IsNullOrWhiteSpace(restaurantName) || tablesCount < 0)
+                {
+                    throw new AddRestaurantException(restaurantName, tablesCount);
                 }
                 Restaurant restaurant = new Restaurant();
                 restaurant.name = restaurantName;
@@ -58,7 +62,8 @@ namespace Restorant_OOP_Lr7
         {
             try
             {
-                if (!File.Exists(filePath)) {
+                if (!File.Exists(filePath))
+                {
                     throw new OpenFileExeption(filePath);
                 }
                 string[] lines = File.ReadAllLines(filePath);
@@ -90,7 +95,6 @@ namespace Restorant_OOP_Lr7
                 {
                     throw new DateException();
                 }
-
 
                 List<string> restaurantFree = new List<string>();
                 foreach (var restaurant in restaurants)
@@ -129,10 +133,11 @@ namespace Restorant_OOP_Lr7
                     }
                 }
             }
-            catch(BookTableException ex) {
+            catch (BookTableException ex)
+            {
                 Console.WriteLine(ex.ToString());
             }
-            
+
 
             return false; //Restaurant not found
         }
@@ -141,35 +146,86 @@ namespace Restorant_OOP_Lr7
         {
             try
             {
-                bool swapped;
-                do
+                if (restaurants == null|| restaurants.Count == 0)
                 {
-                    swapped = false;
-                    for (int i = 0; i < restaurants.Count - 1; i++)
-                    {
-                        int avTc = CountAvailableTables(restaurants[i], date); //Зробити сортування mergeSort
-                        int avTn = CountAvailableTables(restaurants[i + 1], date);
-
-                        if (avTc < avTn)
-                        {
-                            var temp = restaurants[i];
-                            restaurants[i] = restaurants[i + 1];
-                            restaurants[i + 1] = temp;
-                            swapped = true;
-                        }
-                    }
-                } while (swapped);
+                    throw new SortException();
+                }
+                restaurants = new List<Restaurant>(MergeSort(restaurants.ToArray(), date));
             }
-            catch (Exception ex)
+            catch(SortException ex)
             {
-                Console.WriteLine("Error");
+                Console.WriteLine(ex.ToString());
             }
         }
-        public int CountAvailableTables(Restaurant restaurant, DateTime date)
+
+        public Restaurant[] MergeSort(Restaurant[] restaurantArray, DateTime date)
+        {
+            if (restaurantArray.Length == 1)
+            {
+                return restaurantArray;
+            }
+
+            Restaurant[] leftArray = new Restaurant[restaurantArray.Length / 2];
+            Restaurant[] rightArray = new Restaurant[restaurantArray.Length - (restaurantArray.Length / 2)];
+
+            for (int i = 0; i < restaurantArray.Length; i++)
+            {
+                if (i < restaurantArray.Length / 2)
+                {
+                    leftArray[i] = restaurantArray[i];
+                }
+                else
+                {
+                    rightArray[i - (restaurantArray.Length / 2)] = restaurantArray[i];
+                }
+            }
+
+            leftArray = MergeSort(leftArray, date);
+            rightArray = MergeSort(rightArray, date);
+
+            return Merge(leftArray, rightArray, date);
+        }
+
+        public static Restaurant[] Merge(Restaurant[] leftArray, Restaurant[] rightArray, DateTime date)
+        {
+            Restaurant[] mergedArray = new Restaurant[0];
+            while (leftArray.Length > 0 && rightArray.Length > 0)
+            {
+
+                if (CountAvailableTables(leftArray[0], date) >= CountAvailableTables(rightArray[0], date))
+                {
+                    mergedArray = mergedArray.Append<Restaurant>(leftArray[0]).ToArray();
+                    leftArray = leftArray.Skip(1).ToArray();
+                }
+                else
+                {
+                    mergedArray = mergedArray.Append<Restaurant>(rightArray[0]).ToArray();
+                    rightArray = rightArray.Skip(1).ToArray();
+                }
+            }
+            while (leftArray.Length > 0 || rightArray.Length > 0)
+            {
+                if (leftArray.Length > 0)
+                {
+                    mergedArray = mergedArray.Append<Restaurant>(leftArray[0]).ToArray();
+                    leftArray = leftArray.Skip(1).ToArray();
+                }
+                else if (rightArray.Length > 0)
+                {
+                    mergedArray = mergedArray.Append<Restaurant>(rightArray[0]).ToArray();
+                    rightArray = rightArray.Skip(1).ToArray();
+                }
+            }
+
+            return mergedArray;
+        }
+
+        public static int CountAvailableTables(Restaurant restaurant, DateTime date)
         {
             try
             {
-                if (restaurant == null|| date == DateTime.MinValue) {
+                if (restaurant == null || date == DateTime.MinValue)
+                {
                     throw new TablesAvailabilityException(restaurant, date);
                 }
                 int count = 0;
@@ -199,7 +255,6 @@ namespace Restorant_OOP_Lr7
     public class RestaurantTable
     {
         private List<DateTime> bookDates;
-
 
         public RestaurantTable()
         {
@@ -234,4 +289,4 @@ namespace Restorant_OOP_Lr7
             return bookDates.Contains(date);
         }
     }
-} 
+}
