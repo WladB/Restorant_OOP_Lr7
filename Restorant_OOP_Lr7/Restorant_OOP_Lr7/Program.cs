@@ -13,15 +13,12 @@ namespace Restorant_OOP_Lr7
             reservationManager.AddRestaurant("A", 10);
             reservationManager.AddRestaurant("B", 5);
 
-
-            //Замінити значення
             Console.WriteLine(reservationManager.BookTable("A", new DateTime(2023, 12, 25), 3)); // True
             Console.WriteLine(reservationManager.BookTable("A", new DateTime(2023, 12, 25), 3)); // False
 
             Console.ReadLine();
         }
     }
-
 
     public class ReservationManager
     {
@@ -32,7 +29,6 @@ namespace Restorant_OOP_Lr7
         {
             restaurants = new List<Restaurant>();
         }
-
 
         public void AddRestaurant(string restaurantName, int tablesCount)
         {
@@ -158,69 +154,88 @@ namespace Restorant_OOP_Lr7
             }
         }
 
-        public Restaurant[] MergeSort(Restaurant[] restaurantArray, DateTime date)
+        public  Restaurant[] MergeSort(Restaurant[] restaurantArray, DateTime date)
         {
-            if (restaurantArray.Length == 1)
+            try
             {
-                return restaurantArray;
-            }
-
-            Restaurant[] leftArray = new Restaurant[restaurantArray.Length / 2];
-            Restaurant[] rightArray = new Restaurant[restaurantArray.Length - (restaurantArray.Length / 2)];
-
-            for (int i = 0; i < restaurantArray.Length; i++)
-            {
-                if (i < restaurantArray.Length / 2)
-                {
-                    leftArray[i] = restaurantArray[i];
+                if (restaurantArray.Length == 0) {
+                    throw new Exception("Масив для сортування порожній");
                 }
-                else
+
+                if (restaurantArray.Length == 1)
                 {
-                    rightArray[i - (restaurantArray.Length / 2)] = restaurantArray[i];
+                    return restaurantArray;
                 }
+
+                Restaurant[] leftArray = new Restaurant[restaurantArray.Length / 2];
+                Restaurant[] rightArray = new Restaurant[restaurantArray.Length - (restaurantArray.Length / 2)];
+
+                for (int i = 0; i < restaurantArray.Length; i++)
+                {
+                    if (i < restaurantArray.Length / 2)
+                    {
+                        leftArray[i] = restaurantArray[i];
+                    }
+                    else
+                    {
+                        rightArray[i - (restaurantArray.Length / 2)] = restaurantArray[i];
+                    }
+                }
+
+                leftArray = MergeSort(leftArray, date);
+                rightArray = MergeSort(rightArray, date);
+
+                return Merge(leftArray, rightArray, date);
             }
-
-            leftArray = MergeSort(leftArray, date);
-            rightArray = MergeSort(rightArray, date);
-
-            return Merge(leftArray, rightArray, date);
+            catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
+            return new Restaurant[0];
         }
 
-        public static Restaurant[] Merge(Restaurant[] leftArray, Restaurant[] rightArray, DateTime date)
+        public Restaurant[] Merge(Restaurant[] leftArray, Restaurant[] rightArray, DateTime date)
         {
-            Restaurant[] mergedArray = new Restaurant[0];
-            while (leftArray.Length > 0 && rightArray.Length > 0)
+            try
             {
+                Restaurant[] mergedArray = new Restaurant[0];
+                while (leftArray.Length > 0 && rightArray.Length > 0)
+                {
 
-                if (CountAvailableTables(leftArray[0], date) >= CountAvailableTables(rightArray[0], date))
-                {
-                    mergedArray = mergedArray.Append<Restaurant>(leftArray[0]).ToArray();
-                    leftArray = leftArray.Skip(1).ToArray();
+                    if (CountAvailableTables(leftArray[0], date) >= CountAvailableTables(rightArray[0], date))
+                    {
+                        mergedArray = mergedArray.Append<Restaurant>(leftArray[0]).ToArray();
+                        leftArray = leftArray.Skip(1).ToArray();
+                    }
+                    else
+                    {
+                        mergedArray = mergedArray.Append<Restaurant>(rightArray[0]).ToArray();
+                        rightArray = rightArray.Skip(1).ToArray();
+                    }
                 }
-                else
+                while (leftArray.Length > 0 || rightArray.Length > 0)
                 {
-                    mergedArray = mergedArray.Append<Restaurant>(rightArray[0]).ToArray();
-                    rightArray = rightArray.Skip(1).ToArray();
+                    if (leftArray.Length > 0)
+                    {
+                        mergedArray = mergedArray.Append<Restaurant>(leftArray[0]).ToArray();
+                        leftArray = leftArray.Skip(1).ToArray();
+                    }
+                    else if (rightArray.Length > 0)
+                    {
+                        mergedArray = mergedArray.Append<Restaurant>(rightArray[0]).ToArray();
+                        rightArray = rightArray.Skip(1).ToArray();
+                    }
                 }
+
+                return mergedArray;
             }
-            while (leftArray.Length > 0 || rightArray.Length > 0)
+            catch (Exception ex)
             {
-                if (leftArray.Length > 0)
-                {
-                    mergedArray = mergedArray.Append<Restaurant>(leftArray[0]).ToArray();
-                    leftArray = leftArray.Skip(1).ToArray();
-                }
-                else if (rightArray.Length > 0)
-                {
-                    mergedArray = mergedArray.Append<Restaurant>(rightArray[0]).ToArray();
-                    rightArray = rightArray.Skip(1).ToArray();
-                }
+                Console.WriteLine(ex.ToString());
             }
-
-            return mergedArray;
+            return new Restaurant[0];
         }
 
-        public static int CountAvailableTables(Restaurant restaurant, DateTime date)
+        public int CountAvailableTables(Restaurant restaurant, DateTime date)
         {
             try
             {

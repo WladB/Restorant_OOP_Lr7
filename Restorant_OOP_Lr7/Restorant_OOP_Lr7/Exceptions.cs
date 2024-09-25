@@ -11,6 +11,7 @@ namespace Restorant_OOP_Lr7
         protected const string logHeader = "\n-----------------------------LOG-----------------------------";
         protected const string logFooter = "\n-------------------------------------------------------------\n";
 
+        public CustomException() { }
         protected string FormatErrorMessage(string message)
         {
             return $"{logHeader}\n{message}{logFooter}";
